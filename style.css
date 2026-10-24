@@ -1,0 +1,32 @@
+* { box-sizing: border-box; }
+html, body { margin: 0; min-height: 100%; }
+body { background: #f5f7fa; color: #1f2937; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+button { font: inherit; cursor: pointer; }
+.container { max-width: 1180px; margin: 0 auto; padding: 24px 18px; }
+.header { display: flex; gap: 16px; justify-content: space-between; flex-wrap: wrap; align-items: flex-start; }
+h1 { font-size: 24px; margin: 0 0 8px; }
+.header p { margin: 0 0 18px; color: #64748b; }
+#naver-list-link { font-size: 14px; color: #1769aa; text-decoration: none; }
+#naver-list-link[hidden] { display: none; }
+.result, .map-panel, .list-panel { background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; }
+.result { padding: 15px 18px; margin-bottom: 15px; }
+.selected, .result-row { display: flex; align-items: center; gap: 12px 22px; flex-wrap: wrap; }
+.selected { font-size: 14px; margin-bottom: 12px; }
+.selected strong { margin-left: 7px; }
+#distance { color: #0d63c9; font-size: 20px; }
+#duration { color: #475569; }
+#reset { margin-left: auto; border: 1px solid #cbd5e1; background: #fff; border-radius: 6px; padding: 7px 11px; }
+#status { font-size: 13px; color: #475569; margin: 10px 0 0; overflow-wrap: anywhere; }
+#status.error { color: #b42318; }
+.layout { display: grid; grid-template-columns: minmax(0, 1fr) 255px; gap: 14px; }
+.map-panel { overflow: hidden; }
+#map { width: 100%; height: 68vh; min-height: 420px; background: #e9edf2; }
+.list-panel { padding: 15px; }
+h2 { font-size: 16px; margin: 0 0 12px; }
+.place-list { display: flex; flex-direction: column; gap: 8px; max-height: 57vh; overflow-y: auto; }
+.place-button { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 11px 10px; text-align: left; width: 100%; }
+.place-button:hover { border-color: #93c5fd; }
+.place-button.start { background: #eff6ff; border-color: #3b82f6; }
+.place-button.goal { background: #fff7ed; border-color: #fb923c; }
+.list-panel small { display: block; margin-top: 16px; color: #64748b; line-height: 1.6; }
+@media (max-width: 750px) { .layout { grid-template-columns: 1fr; } #map { height: 55vh; min-height: 340px; } .place-list { max-height: 260px; } #reset { margin-left: 0; } }
