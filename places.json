@@ -1,8 +1,5 @@
 {
-  "naverListUrl": "",
-  "places": [
-    { "id": "seoul-city-hall", "name": "서울시청", "lat": 37.56661, "lng": 126.97839 },
-    { "id": "gangnam-station", "name": "강남역", "lat": 37.49794, "lng": 127.02762 },
-    { "id": "jamsil-station", "name": "잠실역", "lat": 37.51326, "lng": 127.10013 }
-  ]
+  "naverListUrl": "https://naver.me/x1uEG7CM",
+  "naverShareId": "637e971b701c47918bea73757249a421",
+  "places": []
 }
