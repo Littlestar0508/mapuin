@@ -19,12 +19,21 @@ const CUSTOM_STYLE_ID = "caf56c7f-8cca-4323-a4f8-07f3df2b8443";
 const AUTO_FIT_PINS = false;
 
 // 초기 위치 및 확대 수준
+// 대한민국 중부: 장소가 있더라도 첫 번째 핀으로 시작 위치를 바꾸지 않습니다.
 const INITIAL_CENTER = {
-  lat: 37.566789,
-  lng: 126.97842,
+  lat: 36.1,
+  lng: 127.8,
 };
 
-const INITIAL_ZOOM = 7;
+const INITIAL_ZOOM = 5;
+
+// 제주도와 동쪽 도서를 포함한 남한 일대의 초기 지도 범위
+const INITIAL_KOREA_BOUNDS = {
+  south: 33.0,
+  west: 124.5,
+  north: 38.7,
+  east: 131.9,
+};
 
 // ============================================
 // 2. 전역 상태
@@ -288,7 +297,7 @@ function renderMap() {
     throw new Error("네이버 지도 SDK를 사용할 수 없습니다.");
   }
 
-  const first = places[0] || INITIAL_CENTER;
+  const first = INITIAL_CENTER;
 
   const mapOptions = {
     center: new naver.maps.LatLng(first.lat, first.lng),
@@ -315,6 +324,18 @@ function renderMap() {
   });
 
   map = new naver.maps.Map("map", mapOptions);
+
+  // 최초 렌더링 시 남한 전체를 화면 크기에 맞춰 표시합니다.
+  // 지도 SDK가 정상 로딩된 이후 renderMap()에서 실행됩니다.
+  if (!AUTO_FIT_PINS) {
+    map.fitBounds(
+      new naver.maps.LatLngBounds(
+        new naver.maps.LatLng(INITIAL_KOREA_BOUNDS.south, INITIAL_KOREA_BOUNDS.west),
+        new naver.maps.LatLng(INITIAL_KOREA_BOUNDS.north, INITIAL_KOREA_BOUNDS.east),
+      ),
+      { top: 20, right: 20, bottom: 20, left: 20 },
+    );
+  }
 
   console.info("[지도 진단] 지도 객체 생성 완료:", Boolean(map));
 

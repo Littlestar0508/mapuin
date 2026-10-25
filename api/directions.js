@@ -1,5 +1,5 @@
 // POST /api/directions: 등록된 장소 ID 2개만 허용하는 Vercel Node.js 함수
-const { getPlaceData } = require('../lib/naver-list');
+const { getPlaceData } = require('../lib/static-places');
 
 module.exports = async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store');
@@ -20,7 +20,7 @@ module.exports = async function handler(req, res) {
     return res.status(400).json({ error: '서로 다른 두 장소를 선택하세요.' });
   }
 
-  // 네이버 리스트 실시간 데이터 또는 places.json 스냅샷의 ID만 조회합니다.
+  // 배포된 places.json에 등록된 장소의 ID만 조회합니다. 네이버 북마크 API는 호출하지 않습니다.
   const { places } = await getPlaceData();
   const start = places.find((p) => p.id === startId);
   const goal = places.find((p) => p.id === goalId);

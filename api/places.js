@@ -1,4 +1,4 @@
-const { getPlaceData } = require('../lib/naver-list');
+const { getPlaceData } = require('../lib/static-places');
 module.exports = async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store');
   if (req.method !== 'GET') {
