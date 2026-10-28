@@ -14,8 +14,32 @@ const PUBLIC_FILES = {
   "/style.css": ["style.css", "text/css; charset=utf-8"],
   "/script.js": ["script.js", "text/javascript; charset=utf-8"],
   "/places.json": ["places.json", "application/json; charset=utf-8"],
-  "/assets/logo.png": ["assets/logo.png", "image/png"],
 };
+
+// 로컬 테스트에서도 /assets/기업명.png, .jpg, .jpeg를 제공하도록 허용합니다.
+// 파일명만 허용해 다른 폴더로 접근하지 못하도록 제한합니다.
+function resolveAsset(pathname) {
+  if (!pathname.startsWith("/assets/")) return null;
+
+  let filename;
+  try {
+    filename = decodeURIComponent(pathname.slice("/assets/".length));
+  } catch {
+    return null;
+  }
+  if (!filename || filename === "." || filename === ".." ||
+      filename.includes("/") || filename.includes("\\") || filename.includes("\0")) {
+    return null;
+  }
+
+  const mime = {
+    ".png": "image/png",
+    ".jpg": "image/jpeg",
+    ".jpeg": "image/jpeg",
+  }[path.extname(filename).toLowerCase()];
+
+  return mime ? [path.join("assets", filename), mime] : null;
+}
 
 // 기존 api/*.js의 Vercel handler가 사용할 res.status().json() 기능을 제공합니다.
 function setJsonHelpers(res) {
@@ -68,14 +92,22 @@ const server = http.createServer(async (req, originalRes) => {
       await directionsHandler(req, res);
       return;
     }
-    const file = PUBLIC_FILES[pathname];
+    const file = PUBLIC_FILES[pathname] || resolveAsset(pathname);
     if (!file)
       return res.status(404).json({ error: "요청한 경로를 찾을 수 없습니다." });
     if (req.method !== "GET" && req.method !== "HEAD") {
       res.setHeader("Allow", "GET, HEAD");
       return res.status(405).json({ error: "허용되지 않은 요청입니다." });
     }
-    const contents = await readFile(path.join(__dirname, file[0]));
+    let contents;
+    try {
+      contents = await readFile(path.join(__dirname, file[0]));
+    } catch (error) {
+      if (error.code === "ENOENT" || error.code === "ENOTDIR") {
+        return res.status(404).json({ error: "파일이 없습니다." });
+      }
+      throw error;
+    }
     res.setHeader("Content-Type", file[1]);
     res.setHeader("Cache-Control", "no-store");
     res.statusCode = 200;

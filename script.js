@@ -80,34 +80,77 @@ function updatePlaceButtons() {
 }
 
 // ============================================
-// 5. 이름이 표시되는 마커 생성
+// 5. 기업 로고 + 장소명이 표시되는 마커 생성
 // ============================================
+
+// places.json의 "기업명(지역)"에서 맨 끝 지역 표기만 제거합니다.
+// 예: "삼성전자(평택)" / "삼성전자 (화성)" -> "삼성전자"
+function getCompanyName(placeName) {
+  const name = String(placeName || "").trim();
+
+  // 첫 번째 괄호 이전의 기업명만 추출
+  return name.split(/[（(]/)[0].trim() || name;
+}
 
 function createLabeledMarker(place, position) {
   const content = document.createElement("div");
   content.className = "map-marker";
 
+  const companyName = getCompanyName(place.name);
+
+  // 이미지가 아직 로드되지 않았거나 파일이 없으면 기존 점 마커 표시
+  const logoBox = document.createElement("span");
+  logoBox.className = "map-marker__logo";
+
   const dot = document.createElement("span");
   dot.className = "map-marker__dot";
   dot.setAttribute("aria-hidden", "true");
 
+  const logo = document.createElement("img");
+  logo.className = "map-marker__logo-image";
+  logo.alt = ""; // 바로 아래에 장소명이 텍스트로 표시됩니다.
+  logo.draggable = false;
+
+  const extensions = ["png", "jpg", "jpeg"];
+  let index = 0;
+
+  logo.onload = () => {
+    logo.classList.add("is-loaded");
+    dot.style.display = "none";
+  };
+
+  logo.onerror = () => {
+    index += 1;
+    if (index < extensions.length) {
+      // 회사명에 공백/한글 등이 있어도 URL에 안전하게 사용
+      logo.src = `/assets/${encodeURIComponent(companyName)}.${extensions[index]}`;
+    } else {
+      logo.remove();
+      dot.style.display = "block";
+    }
+  };
+
+  logoBox.append(dot, logo);
+
   const label = document.createElement("span");
   label.className = "map-marker__label";
-  label.textContent = place.name;
+  label.textContent = companyName; // "기업명(지역)" 원문 유지
 
-  content.append(dot, label);
-
+  content.append(logoBox, label);
   markerElements.set(place.id, content);
+
+  // 처음에는 PNG, 없으면 JPG/JPEG, 모두 없으면 기본 점 마커
+  logo.src = `/assets/${encodeURIComponent(companyName)}.png`;
 
   return new naver.maps.Marker({
     position,
     map,
     title: place.name,
-
     icon: {
       content,
-      size: new naver.maps.Size(220, 80),
-      anchor: new naver.maps.Point(110, 11),
+      size: new naver.maps.Size(220, 100),
+      // 지도 좌표가 로고의 한가운데에 오도록 고정
+      anchor: new naver.maps.Point(110, 24),
     },
   });
 }
@@ -330,8 +373,14 @@ function renderMap() {
   if (!AUTO_FIT_PINS) {
     map.fitBounds(
       new naver.maps.LatLngBounds(
-        new naver.maps.LatLng(INITIAL_KOREA_BOUNDS.south, INITIAL_KOREA_BOUNDS.west),
-        new naver.maps.LatLng(INITIAL_KOREA_BOUNDS.north, INITIAL_KOREA_BOUNDS.east),
+        new naver.maps.LatLng(
+          INITIAL_KOREA_BOUNDS.south,
+          INITIAL_KOREA_BOUNDS.west,
+        ),
+        new naver.maps.LatLng(
+          INITIAL_KOREA_BOUNDS.north,
+          INITIAL_KOREA_BOUNDS.east,
+        ),
       ),
       { top: 20, right: 20, bottom: 20, left: 20 },
     );
